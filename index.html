@@ -10,7 +10,7 @@
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <style>
         body { display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100vh; margin: 0; }
-        canvas { border: 1px solid #333; background: #fff; }
+        canvas { border: 1px solid #333; background: #fff; touch-action: none; }
     </style>
 </head>
 <body>
@@ -19,6 +19,9 @@
         @mousemove="recordPoint($event)"
         @mouseup="stopRecording()"
         @mouseleave="stopRecording()"
+        @touchstart.prevent="startTouch($event)"
+        @touchmove.prevent="moveTouch($event)"
+        @touchend.prevent="stopTouch()"
         ></canvas>
     <div class="flex items-center mt-6">
         <input type="text" maxlength="1" class="w-10 border border-gray-300 rounded px-3 py-2 mr-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
@@ -88,11 +91,12 @@
                     }
                 }
             },
+            // Mouse events
             startRecording(e) {
                 if (this.letter && this.letter.length === 1) {
                     this.isDrawing = true;
                     this.trace = [];
-                    this.recordPoint(e); // record the first point
+                    this.recordPoint(e);
                 }
             },
             recordPoint(e) {
@@ -116,6 +120,30 @@
                 }
                 this.isDrawing = false;
                 this.trace = [];
+            },
+            // Touch events
+            startTouch(e) {
+                if (this.letter && this.letter.length === 1) {
+                    this.isDrawing = true;
+                    this.trace = [];
+                    this.recordTouch(e);
+                }
+            },
+            moveTouch(e) {
+                if (!this.isDrawing) return;
+                this.recordTouch(e);
+            },
+            stopTouch() {
+                this.stopRecording();
+            },
+            recordTouch(e) {
+                if (!this.isDrawing) return;
+                const rect = e.target.getBoundingClientRect();
+                const touch = e.touches[0] || e.changedTouches[0];
+                if (!touch) return;
+                const x = touch.clientX - rect.left;
+                const y = touch.clientY - rect.top;
+                this.trace.push([x, y]);
             },
             play() {
                 // Draw the dots for the entered letter
