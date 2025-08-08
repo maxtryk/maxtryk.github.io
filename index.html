@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" x-data="letterApp()">
+<html lang="en" x-data="letterApp()" x-init="init()">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -38,6 +38,7 @@
 <div class="flex items-center mt-6">
     <select x-model="letter" @change="saveLetter()"
             class="w-16 border border-gray-300 rounded px-3 py-2 mr-2 focus:outline-none focus:ring-2 focus:ring-blue-400">
+        <option selected>-</option>
         <option>А</option>
         <option>Б</option>
         <option>В</option>
@@ -142,6 +143,15 @@
             isDrawing: false,
             mode: 'record',
             trace: [],
+            init() {
+                this.$watch('mode', value => {
+                    if (value === 'test') {
+                        const canvas = document.getElementById('myCanvas');
+                        const ctx = canvas.getContext('2d');
+                        if (window.init_lines) window.init_lines();
+                    }
+                });
+            },
             saveLetter() {
                 if (this.letter && this.letter.length === 1) {
                     let letterTraces = {};
