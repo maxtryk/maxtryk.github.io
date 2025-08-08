@@ -38,7 +38,7 @@
 <div class="flex items-center mt-6">
     <select x-model="letter" @change="saveLetter()"
             class="w-16 border border-gray-300 rounded px-3 py-2 mr-2 focus:outline-none focus:ring-2 focus:ring-blue-400">
-        <option selected>-</option>
+        <option selected></option>
         <option>А</option>
         <option>Б</option>
         <option>В</option>
@@ -93,52 +93,12 @@
 <script>
     const LINE_COLOR = '#38bdf8'; // cyan-100
     const LETTER_COLOR = '#0ea5e9'; // cyan-900
-    function init_lines() {
-        const canvas = document.getElementById('myCanvas');
-        const ctx = canvas.getContext('2d');
-        // Clear canvas
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        // Draw diagonal lines
-        const angle = 67 * Math.PI / 180;
-        const interval = 170;
-        const num_lines = 5;
-        for (let i = 0; i < num_lines; i++) {
-            const x0 = canvas.width - i * interval;
-            const y0 = 0;
-            const L = (canvas.height - y0) / Math.sin(angle);
-            const x1 = x0 - L * Math.cos(angle);
-            const y1 = y0 + L * Math.sin(angle);
-            ctx.beginPath();
-            ctx.moveTo(x0, y0);
-            ctx.lineTo(x1, y1);
-            ctx.strokeStyle = LINE_COLOR;
-            ctx.lineWidth = 1;
-            ctx.stroke();
-        }
-        // Draw horizontal lines
-        const y_middle = canvas.height / 2 + 50;
-        const y1 = y_middle;
-        const y2 = y_middle - 150;
-        const y3 = y_middle - 375;
-        const y4 = y_middle + 225;
-        const ys = [y1, y2, y3, y4];
-        ys.forEach(y => {
-            ctx.beginPath();
-            ctx.moveTo(0, y);
-            ctx.lineTo(canvas.width, y);
-            ctx.strokeStyle = LINE_COLOR;
-            ctx.lineWidth = 1;
-            ctx.stroke();
-        });
-    }
+    const TEST_LETTER_COLOR = '#22c55e'; // green
 
-    window.onload = function () {
-        init_lines();
-    };
-
-    // --- End main.js ---
     function letterApp() {
         return {
+            canvas: null,
+            ctx: null,
             letter: '',
             isDrawing: false,
             mode: 'record',
@@ -148,8 +108,47 @@
                     if (value === 'test') {
                         const canvas = document.getElementById('myCanvas');
                         const ctx = canvas.getContext('2d');
-                        if (window.init_lines) window.init_lines();
+                        this.init_lines();
                     }
+                });
+                this.canvas = document.getElementById('myCanvas');
+                this.ctx = this.canvas.getContext('2d');
+                this.init_lines();
+            },
+            init_lines() {
+                // Clear canvas
+                this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+                // Draw diagonal lines
+                const angle = 67 * Math.PI / 180;
+                const interval = 170;
+                const num_lines = 5;
+                for (let i = 0; i < num_lines; i++) {
+                    const x0 = this.canvas.width - i * interval;
+                    const y0 = 0;
+                    const L = (this.canvas.height - y0) / Math.sin(angle);
+                    const x1 = x0 - L * Math.cos(angle);
+                    const y1 = y0 + L * Math.sin(angle);
+                    this.ctx.beginPath();
+                    this.ctx.moveTo(x0, y0);
+                    this.ctx.lineTo(x1, y1);
+                    this.ctx.strokeStyle = LINE_COLOR;
+                    this.ctx.lineWidth = 1;
+                    this.ctx.stroke();
+                }
+                // Draw horizontal lines
+                const y_middle = this.canvas.height / 2 + 50;
+                const y1 = y_middle;
+                const y2 = y_middle - 150;
+                const y3 = y_middle - 375;
+                const y4 = y_middle + 225;
+                const ys = [y1, y2, y3, y4];
+                ys.forEach(y => {
+                    this.ctx.beginPath();
+                    this.ctx.moveTo(0, y);
+                    this.ctx.lineTo(this.canvas.width, y);
+                    this.ctx.strokeStyle = LINE_COLOR;
+                    this.ctx.lineWidth = 1;
+                    this.ctx.stroke();
                 });
             },
             saveLetter() {
@@ -167,7 +166,7 @@
             },
             // Mouse events
             startRecording(e) {
-                if (this.letter && this.letter.length === 1 && this.mode === 'record') {
+                if (this.letter && this.letter.length === 1) {
                     this.isDrawing = true;
                     this.trace = [];
                     this.recordPoint(e);
@@ -178,20 +177,27 @@
                 const rect = e.target.getBoundingClientRect();
                 const x = e.clientX - rect.left;
                 const y = e.clientY - rect.top;
-                this.trace.push([x, y]);
+                this._pushTrace([x, y]);
+            },
+            _pushTrace(point) {
+                this.trace.push(point);
             },
             stopRecording() {
                 if (this.isDrawing && this.letter && this.letter.length === 1 && this.trace.length > 0) {
-                    let letterTraces = {};
-                    try {
-                        letterTraces = JSON.parse(localStorage.getItem('letterTraces')) || {};
-                    } catch (e) {
+                    if (this.mode === 'test') {
+                        this._drawTraces([this.trace], TEST_LETTER_COLOR, 5);
+                    } else {
+                        let letterTraces = {};
+                        try {
+                            letterTraces = JSON.parse(localStorage.getItem('letterTraces')) || {};
+                        } catch (e) {
+                        }
+                        if (!(this.letter in letterTraces)) {
+                            letterTraces[this.letter] = [];
+                        }
+                        letterTraces[this.letter].push(this.trace);
+                        localStorage.setItem('letterTraces', JSON.stringify(letterTraces));
                     }
-                    if (!(this.letter in letterTraces)) {
-                        letterTraces[this.letter] = [];
-                    }
-                    letterTraces[this.letter].push(this.trace);
-                    localStorage.setItem('letterTraces', JSON.stringify(letterTraces));
                 }
                 this.isDrawing = false;
                 this.trace = [];
@@ -218,37 +224,38 @@
                 if (!touch) return;
                 const x = touch.clientX - rect.left;
                 const y = touch.clientY - rect.top;
-                this.trace.push([x, y]);
+                this._pushTrace([x, y]);
             },
             play() {
                 // Draw the dots for the entered letter
-                const canvas = document.getElementById('myCanvas');
-                const ctx = canvas.getContext('2d');
                 // Redraw the background lines
-                if (window.init_lines) window.init_lines();
+                this.init_lines();
                 let letterTraces = {};
                 try {
                     letterTraces = JSON.parse(localStorage.getItem('letterTraces')) || {};
                 } catch (e) {
                 }
                 if (!this.letter || !(this.letter in letterTraces)) return;
-                ctx.fillStyle = LETTER_COLOR;
-                ctx.strokeStyle = LETTER_COLOR;
-                ctx.lineWidth = 5;
-                letterTraces[this.letter].forEach(trace => {
+                this._drawTraces(letterTraces[this.letter], LETTER_COLOR, 5);
+            },
+            _drawTraces(traces, color, lineWidth) {
+                this.ctx.fillStyle = color;
+                this.ctx.strokeStyle = color;
+                this.ctx.lineWidth = lineWidth;
+                traces.forEach(trace => {
                     if (trace.length === 0) return;
-                    ctx.beginPath();
+                    this.ctx.beginPath();
                     // Draw lines connecting the dots
-                    ctx.moveTo(trace[0][0], trace[0][1]);
+                    this.ctx.moveTo(trace[0][0], trace[0][1]);
                     for (let i = 1; i < trace.length; i++) {
-                        ctx.lineTo(trace[i][0], trace[i][1]);
+                        this.ctx.lineTo(trace[i][0], trace[i][1]);
                     }
-                    ctx.stroke();
+                    this.ctx.stroke();
                     // Draw dots
                     trace.forEach(([x, y]) => {
-                        ctx.beginPath();
-                        ctx.arc(x, y, 2, 0, 2 * Math.PI);
-                        ctx.fill();
+                        this.ctx.beginPath();
+                        this.ctx.arc(x, y, 2, 0, 2 * Math.PI);
+                        this.ctx.fill();
                     });
                 });
             },
@@ -263,8 +270,8 @@
                     localStorage.setItem('letterTraces', JSON.stringify(letterTraces));
                 }
                 const canvas = document.getElementById('myCanvas');
-                const ctx = canvas.getContext('2d');
-                if (window.init_lines) window.init_lines();
+                const ctx = this.canvas.getContext('2d');
+                this.init_lines();
             }
         }
     }
