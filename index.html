@@ -26,7 +26,7 @@
     </style>
 </head>
 <body>
-<canvas id="myCanvas" width="1000" height="700"
+<canvas id="myCanvas" width="1000" height="680"
         @mousedown="startRecording($event)"
         @mousemove="recordPoint($event)"
         @mouseup="stopRecording()"
@@ -266,7 +266,7 @@
             },
             // Touch events
             startTouch(e) {
-                if (this.letter && this.letter.length === 1 && this.mode === 'record') {
+                if (this.letter && this.letter.length === 1) {
                     this.isDrawing = true;
                     this.trace = [];
                     this.recordTouch(e);
