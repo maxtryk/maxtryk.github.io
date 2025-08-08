@@ -36,13 +36,52 @@
         @touchend.prevent="stopTouch()"
 ></canvas>
 <div class="flex items-center mt-6">
-    <input type="text" maxlength="1"
-           class="w-10 border border-gray-300 rounded px-3 py-2 mr-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
-           x-model="letter" @input="saveLetter()">
-    <label class="flex items-center mr-2 select-none">
-        <input type="checkbox" x-model="recordMode" class="mr-1">
-        <span>RECORD</span>
-    </label>
+    <select x-model="letter" @change="saveLetter()"
+            class="w-16 border border-gray-300 rounded px-3 py-2 mr-2 focus:outline-none focus:ring-2 focus:ring-blue-400">
+        <option>А</option>
+        <option>Б</option>
+        <option>В</option>
+        <option>Г</option>
+        <option>Ґ</option>
+        <option>Д</option>
+        <option>Е</option>
+        <option>Є</option>
+        <option>Ж</option>
+        <option>З</option>
+        <option>И</option>
+        <option>І</option>
+        <option>Ї</option>
+        <option>Й</option>
+        <option>К</option>
+        <option>Л</option>
+        <option>М</option>
+        <option>Н</option>
+        <option>О</option>
+        <option>П</option>
+        <option>Р</option>
+        <option>С</option>
+        <option>Т</option>
+        <option>У</option>
+        <option>Ф</option>
+        <option>Х</option>
+        <option>Ц</option>
+        <option>Ч</option>
+        <option>Ш</option>
+        <option>Щ</option>
+        <option>Ь</option>
+        <option>Ю</option>
+        <option>Я</option>
+    </select>
+    <div class="flex items-center mr-2 select-none">
+        <label class="flex items-center mr-2">
+            <input type="radio" x-model="mode" value="record" class="mr-1">
+            <span>RECORD</span>
+        </label>
+        <label class="flex items-center">
+            <input type="radio" x-model="mode" value="test" class="mr-1">
+            <span>TEST</span>
+        </label>
+    </div>
     <button class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded"
             @click="play()">PLAY
     </button>
@@ -101,7 +140,7 @@
         return {
             letter: '',
             isDrawing: false,
-            recordMode: false,
+            mode: 'record',
             trace: [],
             saveLetter() {
                 if (this.letter && this.letter.length === 1) {
@@ -118,7 +157,7 @@
             },
             // Mouse events
             startRecording(e) {
-                if (this.letter && this.letter.length === 1 && this.recordMode) {
+                if (this.letter && this.letter.length === 1 && this.mode === 'record') {
                     this.isDrawing = true;
                     this.trace = [];
                     this.recordPoint(e);
@@ -149,7 +188,7 @@
             },
             // Touch events
             startTouch(e) {
-                if (this.letter && this.letter.length === 1 && this.recordMode) {
+                if (this.letter && this.letter.length === 1 && this.mode === 'record') {
                     this.isDrawing = true;
                     this.trace = [];
                     this.recordTouch(e);
