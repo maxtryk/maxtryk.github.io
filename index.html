@@ -9,12 +9,24 @@
     <!-- Alpine.js CDN -->
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <style>
-        body { display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100vh; margin: 0; }
-        canvas { border: 1px solid #333; background: #fff; touch-action: none; }
+        body {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        canvas {
+            border: 1px solid #333;
+            background: #fff;
+            touch-action: none;
+        }
     </style>
 </head>
 <body>
-    <canvas id="myCanvas" width="1000" height="800"
+<canvas id="myCanvas" width="1000" height="800"
         @mousedown="startRecording($event)"
         @mousemove="recordPoint($event)"
         @mouseup="stopRecording()"
@@ -22,18 +34,20 @@
         @touchstart.prevent="startTouch($event)"
         @touchmove.prevent="moveTouch($event)"
         @touchend.prevent="stopTouch()"
-        ></canvas>
-    <div class="flex items-center mt-6">
-        <input type="text" maxlength="1" class="w-10 border border-gray-300 rounded px-3 py-2 mr-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
-               x-model="letter" @input="saveLetter()">
-        <label class="flex items-center mr-2 select-none">
-            <input type="checkbox" x-model="recordMode" class="mr-1">
-            <span>RECORD</span>
-        </label>
-        <button class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded"
-                @click="play()">PLAY</button>
-    </div>
-    <script>
+></canvas>
+<div class="flex items-center mt-6">
+    <input type="text" maxlength="1"
+           class="w-10 border border-gray-300 rounded px-3 py-2 mr-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
+           x-model="letter" @input="saveLetter()">
+    <label class="flex items-center mr-2 select-none">
+        <input type="checkbox" x-model="recordMode" class="mr-1">
+        <span>RECORD</span>
+    </label>
+    <button class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded"
+            @click="play()">PLAY
+    </button>
+</div>
+<script>
     const LINE_COLOR = '#38bdf8'; // cyan-100
     const LETTER_COLOR = '#0ea5e9'; // cyan-900
     function init_lines() {
@@ -74,9 +88,11 @@
             ctx.stroke();
         });
     }
-    window.onload = function() {
+
+    window.onload = function () {
         init_lines();
     };
+
     // --- End main.js ---
     function letterApp() {
         return {
@@ -89,7 +105,8 @@
                     let letterTraces = {};
                     try {
                         letterTraces = JSON.parse(localStorage.getItem('letterTraces')) || {};
-                    } catch (e) {}
+                    } catch (e) {
+                    }
                     if (!(this.letter in letterTraces)) {
                         letterTraces[this.letter] = [];
                         localStorage.setItem('letterTraces', JSON.stringify(letterTraces));
@@ -116,7 +133,8 @@
                     let letterTraces = {};
                     try {
                         letterTraces = JSON.parse(localStorage.getItem('letterTraces')) || {};
-                    } catch (e) {}
+                    } catch (e) {
+                    }
                     if (!(this.letter in letterTraces)) {
                         letterTraces[this.letter] = [];
                     }
@@ -159,7 +177,8 @@
                 let letterTraces = {};
                 try {
                     letterTraces = JSON.parse(localStorage.getItem('letterTraces')) || {};
-                } catch (e) {}
+                } catch (e) {
+                }
                 if (!this.letter || !(this.letter in letterTraces)) return;
                 ctx.fillStyle = LETTER_COLOR;
                 ctx.strokeStyle = LETTER_COLOR;
@@ -183,6 +202,6 @@
             }
         }
     }
-    </script>
+</script>
 </body>
 </html>
