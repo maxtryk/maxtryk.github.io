@@ -180,6 +180,14 @@
                 this._pushTrace([x, y]);
             },
             _pushTrace(point) {
+                if (this.trace.length > 1) {
+                    this.ctx.strokeStyle = TEST_LETTER_COLOR;
+                    this.ctx.lineWidth = 5;
+                    this.ctx.beginPath();
+                    this.ctx.moveTo(this.trace[this.trace.length - 1][0], this.trace[this.trace.length - 1][1]);
+                    this.ctx.lineTo(point[0], point[1]);
+                    this.ctx.stroke();
+                }
                 this.trace.push(point);
             },
             stopRecording() {
@@ -245,18 +253,11 @@
                 traces.forEach(trace => {
                     if (trace.length === 0) return;
                     this.ctx.beginPath();
-                    // Draw lines connecting the dots
                     this.ctx.moveTo(trace[0][0], trace[0][1]);
                     for (let i = 1; i < trace.length; i++) {
                         this.ctx.lineTo(trace[i][0], trace[i][1]);
                     }
                     this.ctx.stroke();
-                    // Draw dots
-                    trace.forEach(([x, y]) => {
-                        this.ctx.beginPath();
-                        this.ctx.arc(x, y, 2, 0, 2 * Math.PI);
-                        this.ctx.fill();
-                    });
                 });
             },
             clearLetter() {
