@@ -26,6 +26,10 @@
     <div class="flex items-center mt-6">
         <input type="text" maxlength="1" class="w-10 border border-gray-300 rounded px-3 py-2 mr-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
                x-model="letter" @input="saveLetter()">
+        <label class="flex items-center mr-2 select-none">
+            <input type="checkbox" x-model="recordMode" class="mr-1">
+            <span>RECORD</span>
+        </label>
         <button class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded"
                 @click="play()">PLAY</button>
     </div>
@@ -78,6 +82,7 @@
         return {
             letter: '',
             isDrawing: false,
+            recordMode: false,
             trace: [],
             saveLetter() {
                 if (this.letter && this.letter.length === 1) {
@@ -93,7 +98,7 @@
             },
             // Mouse events
             startRecording(e) {
-                if (this.letter && this.letter.length === 1) {
+                if (this.letter && this.letter.length === 1 && this.recordMode) {
                     this.isDrawing = true;
                     this.trace = [];
                     this.recordPoint(e);
@@ -123,7 +128,7 @@
             },
             // Touch events
             startTouch(e) {
-                if (this.letter && this.letter.length === 1) {
+                if (this.letter && this.letter.length === 1 && this.recordMode) {
                     this.isDrawing = true;
                     this.trace = [];
                     this.recordTouch(e);
