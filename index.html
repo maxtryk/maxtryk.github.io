@@ -26,7 +26,7 @@
     </style>
 </head>
 <body>
-<canvas id="myCanvas" width="1000" height="800"
+<canvas id="myCanvas" width="1000" height="700"
         @mousedown="startRecording($event)"
         @mousemove="recordPoint($event)"
         @mouseup="stopRecording()"
@@ -94,6 +94,9 @@
     const LINE_COLOR = '#38bdf8'; // cyan-100
     const LETTER_COLOR = '#0ea5e9'; // cyan-900
     const TEST_LETTER_COLOR = '#22c55e'; // green
+    const MAX_DEVIATION = 25;
+    const MIN_MATCHED_PERCENTAGE = 0.8;
+    const STANDARD_LINE_WIDTH = 5;
 
     function letterApp() {
         return {
@@ -137,10 +140,10 @@
                 }
                 // Draw horizontal lines
                 const y_middle = this.canvas.height / 2 + 50;
-                const y1 = y_middle;
-                const y2 = y_middle - 150;
-                const y3 = y_middle - 375;
-                const y4 = y_middle + 225;
+                const y1 = 100;
+                const y2 = y1 + 180;
+                const y3 = y2 + 120;
+                const y4 = y3 + 180;
                 const ys = [y1, y2, y3, y4];
                 ys.forEach(y => {
                     this.ctx.beginPath();
@@ -177,9 +180,9 @@
                 const rect = e.target.getBoundingClientRect();
                 const x = e.clientX - rect.left;
                 const y = e.clientY - rect.top;
-                this._pushTrace([x, y]);
+                this.pushTrace([x, y]);
             },
-            _pushTrace(point) {
+            pushTrace(point) {
                 if (this.trace.length > 1) {
                     this.ctx.strokeStyle = TEST_LETTER_COLOR;
                     this.ctx.lineWidth = 5;
@@ -193,7 +196,7 @@
             stopRecording() {
                 if (this.isDrawing && this.letter && this.letter.length === 1 && this.trace.length > 0) {
                     if (this.mode === 'test') {
-                        this._drawTraces([this.trace], TEST_LETTER_COLOR, 5);
+                        this.matchTraces();
                     } else {
                         let letterTraces = {};
                         try {
@@ -209,6 +212,57 @@
                 }
                 this.isDrawing = false;
                 this.trace = [];
+            },
+            matchingTraceIndex: 0,
+            matchTraces() {
+                let letterTraces = JSON.parse(localStorage.getItem('letterTraces')) || {};
+                const refTraces = letterTraces[this.letter] || [];
+                if (!refTraces[this.matchingTraceIndex] || this.trace.length === 0) return;
+                const refTrace = refTraces[this.matchingTraceIndex];
+
+                let matched = 0
+                for (const refPoint of refTrace) {
+                    for (const point of this.trace) {
+                        if (
+                            Math.abs(point[0] - refPoint[0]) < MAX_DEVIATION
+                            && Math.abs(point[1] - refPoint[1]) < MAX_DEVIATION
+                        ) {
+                            matched += 1;
+                            break;
+                        }
+                    }
+                }
+
+                let reverseMatched = 0
+                for (const point of this.trace) {
+                    for (const refPoint of refTrace) {
+                        if (
+                            Math.abs(point[0] - refPoint[0]) < MAX_DEVIATION
+                            && Math.abs(point[1] - refPoint[1]) < MAX_DEVIATION
+                        ) {
+                            reverseMatched += 1;
+                            break;
+                        }
+                    }
+                }
+
+                if (
+                    matched / refTrace.length < MIN_MATCHED_PERCENTAGE
+                    || reverseMatched / this.trace.length < MIN_MATCHED_PERCENTAGE
+                ) {
+                    const matchPercentage = Math.round(matched / refTrace.length * 100);
+                    const reverseMatchPercentage = Math.round(reverseMatched / this.trace.length * 100);
+                    alert(`matched: ${matchPercentage}% / ${reverseMatchPercentage}%`);
+                    return;
+                }
+                this.drawTraces([refTrace], LETTER_COLOR, STANDARD_LINE_WIDTH);
+                this.matchingTraceIndex += 1
+                console.log(this.matchingTraceIndex);
+                if (this.matchingTraceIndex >= refTraces.length) {
+                    this.matchingTraceIndex = 0;
+                    this.init_lines();
+                    this.drawTraces(refTraces, LETTER_COLOR, STANDARD_LINE_WIDTH * 2);
+                }
             },
             // Touch events
             startTouch(e) {
@@ -232,7 +286,7 @@
                 if (!touch) return;
                 const x = touch.clientX - rect.left;
                 const y = touch.clientY - rect.top;
-                this._pushTrace([x, y]);
+                this.pushTrace([x, y]);
             },
             play() {
                 // Draw the dots for the entered letter
@@ -244,9 +298,9 @@
                 } catch (e) {
                 }
                 if (!this.letter || !(this.letter in letterTraces)) return;
-                this._drawTraces(letterTraces[this.letter], LETTER_COLOR, 5);
+                this.drawTraces(letterTraces[this.letter], LETTER_COLOR, 5);
             },
-            _drawTraces(traces, color, lineWidth) {
+            drawTraces(traces, color, lineWidth) {
                 this.ctx.fillStyle = color;
                 this.ctx.strokeStyle = color;
                 this.ctx.lineWidth = lineWidth;
