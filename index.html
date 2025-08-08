@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" x-data="letterApp()">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,12 +9,93 @@
     <!-- Alpine.js CDN -->
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <style>
-        body { display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        body { display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100vh; margin: 0; }
         canvas { border: 1px solid #333; background: #fff; }
     </style>
 </head>
 <body>
-    <canvas id="myCanvas" width="1000" height="800"></canvas>
+    <canvas id="myCanvas" width="1000" height="800"
+        @mousedown="startRecording($event)"
+        @mousemove="recordPoint($event)"
+        @mouseup="stopRecording()"
+        @mouseleave="stopRecording()"
+        ></canvas>
+    <div class="flex items-center mt-6">
+        <input type="text" maxlength="1" class="w-10 border border-gray-300 rounded px-3 py-2 mr-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
+               x-model="letter" @input="saveLetter()">
+        <button class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded"
+                @click="play()">PLAY</button>
+    </div>
     <script src="main.js"></script>
+    <script>
+    function letterApp() {
+        return {
+            letter: '',
+            isDrawing: false,
+            trace: [],
+            saveLetter() {
+                if (this.letter && this.letter.length === 1) {
+                    let letterTraces = {};
+                    try {
+                        letterTraces = JSON.parse(localStorage.getItem('letterTraces')) || {};
+                    } catch (e) {}
+                    if (!(this.letter in letterTraces)) {
+                        letterTraces[this.letter] = [];
+                        localStorage.setItem('letterTraces', JSON.stringify(letterTraces));
+                    }
+                }
+            },
+            startRecording(e) {
+                if (this.letter && this.letter.length === 1) {
+                    this.isDrawing = true;
+                    this.trace = [];
+                    this.recordPoint(e); // record the first point
+                }
+            },
+            recordPoint(e) {
+                if (!this.isDrawing) return;
+                const rect = e.target.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                this.trace.push([x, y]);
+            },
+            stopRecording() {
+                if (this.isDrawing && this.letter && this.letter.length === 1 && this.trace.length > 0) {
+                    let letterTraces = {};
+                    try {
+                        letterTraces = JSON.parse(localStorage.getItem('letterTraces')) || {};
+                    } catch (e) {}
+                    if (!(this.letter in letterTraces)) {
+                        letterTraces[this.letter] = [];
+                    }
+                    letterTraces[this.letter].push(this.trace);
+                    localStorage.setItem('letterTraces', JSON.stringify(letterTraces));
+                }
+                this.isDrawing = false;
+                this.trace = [];
+            },
+            play() {
+                // Draw the dots for the entered letter
+                const canvas = document.getElementById('myCanvas');
+                const ctx = canvas.getContext('2d');
+                // Redraw the background lines
+                if (window.init_lines) window.init_lines();
+                let letterTraces = {};
+                try {
+                    letterTraces = JSON.parse(localStorage.getItem('letterTraces')) || {};
+                } catch (e) {}
+                if (!this.letter || !(this.letter in letterTraces)) return;
+                ctx.fillStyle = '#1e293b'; // slate-800
+                letterTraces[this.letter].forEach(trace => {
+                    trace.forEach(([x, y]) => {
+                        ctx.beginPath();
+                        ctx.arc(x, y, 2, 0, 2 * Math.PI);
+                        ctx.fill();
+                    });
+                });
+            }
+        }
+    }
+    </script>
 </body>
 </html>
