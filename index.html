@@ -94,7 +94,7 @@
             ctx: null,
             letter: '',
             isDrawing: false,
-            mode: 'record',
+            mode: 'test',
             trace: [],
             avgMatch: 0,
             matchBarColor: '',
@@ -275,6 +275,12 @@
                     spread: 90,
                     origin: { y: 0.7 }
                 });
+                setTimeout(() => {
+                    // remove the letter from dropdown and select a random next one
+                    const letters = this.letters.filter(l => l !== this.letter);
+                    this.letter = letters[Math.floor(Math.random() * letters.length)];
+                    this.init_lines();
+                }, 3000);
             },
             // Touch events
             startTouch(e) {
