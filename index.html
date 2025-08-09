@@ -29,7 +29,7 @@
 <div class="flex flex-col justify-center items-center gap-5 w-full">
     <div class="flex flex-row gap-x-2">
         <div class="flex flex-col gap-5 select-none mt-10">
-            <select x-model="letter" @change="saveLetter()"
+            <select x-model="letter" @change="init_lines()"
                     class="w-16 border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
             >
                 <template x-for="letter in letters" :key="letter">
@@ -162,19 +162,6 @@
                     this.ctx.lineWidth = 1;
                     this.ctx.stroke();
                 });
-            },
-            saveLetter() {
-                if (this.letter && this.letter.length === 1) {
-                    let letterTraces = {};
-                    try {
-                        letterTraces = JSON.parse(localStorage.getItem('letterTraces')) || {};
-                    } catch (e) {
-                    }
-                    if (!(this.letter in letterTraces)) {
-                        letterTraces[this.letter] = [];
-                        localStorage.setItem('letterTraces', JSON.stringify(letterTraces));
-                    }
-                }
             },
             // Mouse events
             startRecording(e) {
