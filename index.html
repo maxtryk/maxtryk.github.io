@@ -64,7 +64,9 @@
                              :style="'width:' + avgMatch + '%; background-color:' + matchBarColor">
                         </div>
                     </div>
-                    <span class="ml-3 text-gray-700 font-semibold w-16 text-right" x-text="avgMatch + '%'" style="min-width:3rem"></span>
+                    <span class="ml-3 text-gray-700 font-semibold w-26 text-right whitespace-nowrap"
+                          x-text="avgMatch + '% (' + (matchingTraceIndex || totalTraceCount) + '/' + totalTraceCount + ')'">
+                    </span>
                 </div>
                 <canvas id="myCanvas" width="1000" height="680"
                         @mousedown="startRecording($event)"
@@ -84,7 +86,7 @@
     const LETTER_COLOR = '#0ea5e9'; // cyan-900
     const TEST_LETTER_COLOR = '#22c55e'; // green
     const MAX_DEVIATION = 25;
-    const MIN_MATCHED_PERCENTAGE = 0.8;
+    const MIN_MATCHED_PERCENTAGE = 80;
     const STANDARD_LINE_WIDTH = 5;
 
     function letterApp() {
@@ -209,12 +211,14 @@
                 this.isDrawing = false;
                 this.trace = [];
             },
+            totalTraceCount: 0,
             matchingTraceIndex: 0,
             matchTraces() {
                 let letterTraces = JSON.parse(localStorage.getItem('letterTraces')) || {};
                 const refTraces = letterTraces[this.letter] || [];
                 if (!refTraces[this.matchingTraceIndex] || this.trace.length === 0) return;
                 const refTrace = refTraces[this.matchingTraceIndex];
+                this.totalTraceCount = refTraces.length;
 
                 let matched = 0
                 for (const refPoint of refTrace) {
@@ -242,17 +246,17 @@
                     }
                 }
 
+                const matchPercentage = Math.round(matched / refTrace.length * 100);
+                const reverseMatchPercentage = Math.round(reverseMatched / this.trace.length * 100);
+                this.avgMatch = Math.round((Math.min(matchPercentage, reverseMatchPercentage)));
+
                 if (
-                    matched / refTrace.length < MIN_MATCHED_PERCENTAGE
-                    || reverseMatched / this.trace.length < MIN_MATCHED_PERCENTAGE
+                    matchPercentage < MIN_MATCHED_PERCENTAGE
+                    || reverseMatchPercentage < MIN_MATCHED_PERCENTAGE
                 ) {
-                    const matchPercentage = Math.round(matched / refTrace.length * 100);
-                    const reverseMatchPercentage = Math.round(reverseMatched / this.trace.length * 100);
-                    this.avgMatch = Math.round((Math.min(matchPercentage, reverseMatchPercentage)));
                     return;
                 }
 
-                this.avgMatch = 100;
                 this.drawTraces([refTrace], LETTER_COLOR, STANDARD_LINE_WIDTH);
                 this.matchingTraceIndex += 1
                 console.log(this.matchingTraceIndex);
