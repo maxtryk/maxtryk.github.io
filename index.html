@@ -64,9 +64,6 @@
                              :style="'width:' + avgMatch + '%; background-color:' + matchBarColor">
                         </div>
                     </div>
-                    <span class="ml-3 text-gray-700 font-semibold w-26 text-right whitespace-nowrap"
-                          x-text="avgMatch + '% (' + (matchingTraceIndex || totalTraceCount) + '/' + totalTraceCount + ')'">
-                    </span>
                 </div>
                 <canvas id="myCanvas" width="1000" height="680"
                         @mousedown="startRecording($event)"
