@@ -28,7 +28,7 @@
 <body>
 <div class="flex flex-col justify-center items-center gap-5 w-full">
     <div class="flex flex-row gap-x-2">
-        <div class="flex flex-col gap-5 select-none">
+        <div class="flex flex-col gap-5 select-none mt-10">
             <select x-model="letter" @change="saveLetter()"
                     class="w-16 border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
             >
@@ -37,12 +37,12 @@
                 </template>
             </select>
             <div class="flex flex-col gap-5 items-start">
-                <label class="flex items-center mr-2">
-                    <input type="radio" x-model="mode" value="record" class="mr-1">
+                <label class="flex items-center mr-2 mt-5">
+                    <input type="radio" x-model="mode" value="record" class="mr-2">
                     <span>RECORD</span>
                 </label>
-                <label class="flex items-center">
-                    <input type="radio" x-model="mode" value="test" class="mr-1">
+                <label class="flex items-center mb-5">
+                    <input type="radio" x-model="mode" value="test" class="mr-2">
                     <span>TEST</span>
                 </label>
                 <button class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded"
@@ -57,15 +57,25 @@
             </div>
         </div>
         <div class="flex flex-col items-center w-full">
-            <canvas id="myCanvas" width="1000" height="680"
-                    @mousedown="startRecording($event)"
-                    @mousemove="recordPoint($event)"
-                    @mouseup="stopRecording()"
-                    @mouseleave="stopRecording()"
-                    @touchstart.prevent="startTouch($event)"
-                    @touchmove.prevent="moveTouch($event)"
-                    @touchend.prevent="stopTouch()"
-            ></canvas>
+            <div class="w-full flex flex-col items-center">
+                <div class="w-[600px] h-6 flex items-center mb-4">
+                    <div class="w-full bg-gray-200 rounded-full h-4 overflow-hidden">
+                        <div class="h-4 transition-all duration-300"
+                             :style="'width:' + avgMatch + '%; background-color:' + matchBarColor">
+                        </div>
+                    </div>
+                    <span class="ml-3 text-gray-700 font-semibold w-16 text-right" x-text="avgMatch + '%'" style="min-width:3rem"></span>
+                </div>
+                <canvas id="myCanvas" width="1000" height="680"
+                        @mousedown="startRecording($event)"
+                        @mousemove="recordPoint($event)"
+                        @mouseup="stopRecording()"
+                        @mouseleave="stopRecording()"
+                        @touchstart.prevent="startTouch($event)"
+                        @touchmove.prevent="moveTouch($event)"
+                        @touchend.prevent="stopTouch()"
+                ></canvas>
+            </div>
         </div>
     </div>
 </div>
@@ -86,12 +96,23 @@
             isDrawing: false,
             mode: 'record',
             trace: [],
+            avgMatch: 0,
+            matchBarColor: '',
             init() {
                 this.$watch('mode', value => {
                     if (value === 'test') {
                         const canvas = document.getElementById('myCanvas');
                         const ctx = canvas.getContext('2d');
                         this.init_lines();
+                    }
+                });
+                this.$watch('avgMatch', value => {
+                    if (value < 33) {
+                        this.matchBarColor = 'red';
+                    } else if (value < 80) {
+                        this.matchBarColor = 'yellow';
+                    } else {
+                        this.matchBarColor = '#22c55e';
                     }
                 });
                 this.canvas = document.getElementById('myCanvas');
@@ -232,9 +253,11 @@
                 ) {
                     const matchPercentage = Math.round(matched / refTrace.length * 100);
                     const reverseMatchPercentage = Math.round(reverseMatched / this.trace.length * 100);
-                    alert(`matched: ${matchPercentage}% / ${reverseMatchPercentage}%`);
+                    this.avgMatch = Math.round((Math.min(matchPercentage, reverseMatchPercentage)));
                     return;
                 }
+
+                this.avgMatch = 100;
                 this.drawTraces([refTrace], LETTER_COLOR, STANDARD_LINE_WIDTH);
                 this.matchingTraceIndex += 1
                 console.log(this.matchingTraceIndex);
