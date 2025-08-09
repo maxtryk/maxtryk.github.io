@@ -27,7 +27,7 @@
 </head>
 <body>
 <div class="flex flex-row gap-x-4 mt-5">
-    <div class="flex flex-col gap-5 select-none mt-10">
+    <div :class="mode === 'test' ? 'absolute top-4 left-4 z-50 bg-white/90 rounded-lg shadow-lg p-4 flex flex-row gap-x-4' : 'flex flex-col gap-5 select-none mt-10'" style="width:fit-content;" x-ref="controls">
         <select x-model="letter" @change="init_lines()"
                 class="w-22 text-6xl border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
         >
@@ -48,10 +48,10 @@
                     @click="play()">PLAY
             </button>
             <button class="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded"
-                    @click="clearLetter()">CLEAR
+                    @click="clearLetter()" x-show="mode !== 'test'">CLEAR
             </button>
             <button class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded"
-                    @click="exportData()">EXPORT
+                    @click="exportData()" x-show="mode !== 'test'">EXPORT
             </button>
         </div>
     </div>
