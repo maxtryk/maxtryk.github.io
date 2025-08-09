@@ -99,6 +99,14 @@
             avgMatch: 0,
             matchBarColor: '',
             init() {
+                // Fetch letterTraces.json from /letterTraces.json and load into localStorage
+                fetch('/letterTraces.json')
+                    .then(response => {
+                        return response.json();
+                    })
+                    .then(data => {
+                        localStorage.setItem('letterTraces', JSON.stringify(data));
+                    })
                 this.$watch('mode', value => {
                     if (value === 'test') {
                         const canvas = document.getElementById('myCanvas');
