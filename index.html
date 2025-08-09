@@ -14,7 +14,6 @@
         body {
             display: flex;
             flex-direction: column;
-            justify-content: center;
             align-items: center;
             height: 100vh;
             margin: 0;
@@ -27,7 +26,7 @@
     </style>
 </head>
 <body>
-<div class="flex flex-row gap-x-4">
+<div class="flex flex-row gap-x-4 mt-5">
     <div class="flex flex-col gap-5 select-none mt-10">
         <select x-model="letter" @change="init_lines()"
                 class="w-22 text-6xl border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
