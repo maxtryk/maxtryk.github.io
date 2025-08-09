@@ -103,8 +103,8 @@
                 this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
                 // Draw diagonal lines
                 const angle = 67 * Math.PI / 180;
-                const interval = 170;
-                const num_lines = 5;
+                const interval = 140;
+                const num_lines = 6;
                 for (let i = 0; i < num_lines; i++) {
                     const x0 = this.canvas.width - i * interval;
                     const y0 = 0;
@@ -120,10 +120,10 @@
                 }
                 // Draw horizontal lines
                 const y_middle = this.canvas.height / 2 + 50;
-                const y1 = 100;
-                const y2 = y1 + 180;
+                const y1 = 75;
+                const y2 = y1 + 205;
                 const y3 = y2 + 120;
-                const y4 = y3 + 180;
+                const y4 = y3 + 205;
                 const ys = [y1, y2, y3, y4];
                 ys.forEach(y => {
                     this.ctx.beginPath();
