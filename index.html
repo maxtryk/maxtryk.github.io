@@ -45,7 +45,7 @@
                 <span>TEST</span>
             </label>
             <button class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded"
-                    @click="play()">PLAY
+                    @click="play()">HINT
             </button>
             <button class="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded"
                     @click="clearLetter()" x-show="mode !== 'test'">CLEAR
@@ -292,10 +292,13 @@
                 setTimeout(() => {
                     // remove the letter from dropdown and select a random next one
                     this.letters = this.letters.filter(l => l !== this.letter);
-                    this.letter = this.letters[Math.floor(Math.random() * this.letters.length)];
-                    this.init_lines();
-                    this.avgMatch = 0;
+                    this.selectRandomLetter();
                 }, 3000);
+            },
+            selectRandomLetter() {
+                this.letter = this.letters[Math.floor(Math.random() * this.letters.length)];
+                this.init_lines();
+                this.avgMatch = 0;
             },
             // Touch events
             startTouch(e) {
@@ -332,6 +335,9 @@
                 }
                 if (!this.letter || !(this.letter in letterTraces)) return;
                 this.drawTraces(letterTraces[this.letter], LETTER_COLOR, 5);
+                setTimeout(() => {
+                    this.selectRandomLetter();
+                }, 3000);
             },
             drawTraces(traces, color, lineWidth) {
                 this.ctx.fillStyle = color;
