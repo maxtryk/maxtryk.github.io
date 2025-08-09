@@ -31,7 +31,7 @@
         <div class="flex flex-col gap-5 select-none">
             <select x-model="letter" @change="saveLetter()"
                     class="w-16 border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
-                    size="18">
+                    size="15">
                 <template x-for="letter in letters" :key="letter">
                     <option x-text="letter"></option>
                 </template>
@@ -50,6 +50,9 @@
                 </button>
                 <button class="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded"
                         @click="clearLetter()">CLEAR
+                </button>
+                <button class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded"
+                        @click="exportData()">EXPORT
                 </button>
             </div>
         </div>
@@ -304,6 +307,20 @@
                 const canvas = document.getElementById('myCanvas');
                 const ctx = this.canvas.getContext('2d');
                 this.init_lines();
+            },
+            exportData() {
+                let letterTraces = {};
+                try {
+                    letterTraces = JSON.parse(localStorage.getItem('letterTraces')) || {};
+                } catch (e) {
+                }
+                const data = JSON.stringify(letterTraces);
+                const blob = new Blob([data], {type: 'application/json'});
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'letterTraces.json';
+                a.click();
             }
         }
     }
