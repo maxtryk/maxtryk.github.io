@@ -8,6 +8,8 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Alpine.js CDN -->
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <!-- Canvas Confetti CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <style>
         body {
             display: flex;
@@ -20,7 +22,6 @@
 
         canvas {
             border: 1px solid #333;
-            background: #fff;
             touch-action: none;
         }
     </style>
@@ -263,6 +264,17 @@
                     this.init_lines();
                     this.drawTraces(refTraces, LETTER_COLOR, STANDARD_LINE_WIDTH * 2);
                 }
+
+                if (this.matchingTraceIndex === 0) {
+                    this.shootConfetti();
+                }
+            },
+            shootConfetti() {
+                confetti({
+                    particleCount: 120,
+                    spread: 90,
+                    origin: { y: 0.7 }
+                });
             },
             // Touch events
             startTouch(e) {
