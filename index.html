@@ -108,6 +108,7 @@
                     })
                     .then(data => {
                         localStorage.setItem('letterTraces', JSON.stringify(data));
+                        this.letter = this.letters[0];
                     })
                 this.$watch('mode', value => {
                     if (value === 'test') {
